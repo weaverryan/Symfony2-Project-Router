@@ -12,6 +12,11 @@ use Symfony\Component\Routing\Loader\YamlFileLoader;
 class ProjectRouter
 {
     /**
+     * @var string
+     */
+    protected $routingDir;
+
+    /**
      * @var mixed
      */
     protected $resource;
@@ -27,11 +32,13 @@ class ProjectRouter
     protected $router;
 
     /**
+     * @param  string $routingDir The directory to look for the routing resource
      * @param  mixed $resource The routing resource to source from
      * @param  boolean $debug Whether to load the router in debug mode
      */
-    public function __construct($resource, $debug = false)
+    public function __construct($routingDir, $resource, $debug = false)
     {
+        $this->routingDir = $routingDir;
         $this->resource = $resource;
         $this->debug = $debug;
     }
@@ -42,7 +49,7 @@ class ProjectRouter
     public function getRouter()
     {
         if ($this->router === null) {
-            $loader = new YamlFileLoader(__DIR__.'/routing');
+            $loader = new YamlFileLoader($this->routingDir);
 
             $cacheDir = __DIR__.'/cache/'.($this->debug ? 'debug' : 'prod');
             if (!file_exists($cacheDir))
