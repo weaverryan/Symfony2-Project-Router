@@ -1,0 +1,6 @@
+homepage:
+    pattern:  /
+    defaults: { _app: v2 }
+about:
+    pattern:  /privacy
+    defaults: { _app: v1 }
