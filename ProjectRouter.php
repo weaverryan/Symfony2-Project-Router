@@ -52,8 +52,16 @@ class ProjectRouter
             $loader = new YamlFileLoader($this->routingDir);
 
             $cacheDir = __DIR__.'/cache/'.($this->debug ? 'debug' : 'prod');
-            if (!file_exists($cacheDir))
-            {
+            
+            if (!file_exists($cacheDir)) {
+                if (!file_exists(dirname($cacheDir))) {
+                    throw new \Exception(sprintf('Cache directory "%s" does not exist.', dirname($cacheDir)));
+                }
+
+                if (!is_writable(dirname($cacheDir))) {
+                    throw new \Exception(sprintf('Cache directory "%s" is not writable.', dirname($cacheDir)));
+                }
+
                 mkdir($cacheDir, 0777);
             }
 
