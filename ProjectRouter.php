@@ -5,6 +5,8 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Router;
 use Symfony\Bundle\FrameworkBundle\Routing\DelegatingLoader;
 use Symfony\Component\Routing\Loader\YamlFileLoader;
+use Symfony\Component\Config\FileLocator;
+use Symfony\Component\Routing\Matcher\Exception\NotFoundException;
 
 /**
  * 
@@ -49,7 +51,7 @@ class ProjectRouter
     public function getRouter()
     {
         if ($this->router === null) {
-            $loader = new YamlFileLoader($this->routingDir);
+            $loader = new YamlFileLoader(new FileLocator($this->routingDir));
 
             $cacheDir = __DIR__.'/cache/'.($this->debug ? 'debug' : 'prod');
             
@@ -108,15 +110,17 @@ class ProjectRouter
             'is_secure' => $request->isSecure(),
         ));
 
-        if (false !== $parameters = $this->getRouter()->match($request->getPathInfo())) {
+        try {
+            $parameters = $this->getRouter()->match($request->getPathInfo());
+
             if (!isset($parameters['_app'])) {
                 $route = $parameters['_route'];
                 throw new \InvalidArgumentException(sprintf('No "_app" parameter specified for route "%s"', $route));
             }
 
             return $parameters['_app'];
+        } catch (NotFoundException $e) {
+            return $default;
         }
-
-        return $default;
     }
 }
