@@ -7,6 +7,7 @@ use Symfony\Bundle\FrameworkBundle\Routing\DelegatingLoader;
 use Symfony\Component\Routing\Loader\YamlFileLoader;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\Routing\Matcher\Exception\NotFoundException;
+use Symfony\Component\Routing\RequestContext;
 
 /**
  * 
@@ -103,12 +104,13 @@ class ProjectRouter
         }
 
         // set the context information on the router
-        $this->getRouter()->setContext(array(
-            'base_url'  => $request->getBaseUrl(),
-            'method'    => $request->getMethod(),
-            'host'      => $request->getHost(),
-            'is_secure' => $request->isSecure(),
-        ));
+        $context = new RequestContext(
+            $request->getBaseUrl(),
+            $request->getMethod(),
+            $request->getHost(),
+            $request->getScheme()
+        );
+        $this->getRouter()->setContext($context);
 
         try {
             $parameters = $this->getRouter()->match($request->getPathInfo());
