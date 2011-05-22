@@ -6,7 +6,7 @@ use Symfony\Component\Routing\Router;
 use Symfony\Bundle\FrameworkBundle\Routing\DelegatingLoader;
 use Symfony\Component\Routing\Loader\YamlFileLoader;
 use Symfony\Component\Config\FileLocator;
-use Symfony\Component\Routing\Matcher\Exception\NotFoundException;
+use Symfony\Component\Routing\Exception\ResourceNotFoundException;
 use Symfony\Component\Routing\RequestContext;
 
 /**
@@ -35,15 +35,21 @@ class ProjectRouter
     protected $router;
 
     /**
+     * @var string
+     */
+    protected $cacheDir;
+
+    /**
      * @param  string $routingDir The directory to look for the routing resource
      * @param  mixed $resource The routing resource to source from
      * @param  boolean $debug Whether to load the router in debug mode
      */
-    public function __construct($routingDir, $resource, $debug = false)
+    public function __construct($routingDir, $resource, $debug = false, $cacheDir)
     {
         $this->routingDir = $routingDir;
         $this->resource = $resource;
         $this->debug = $debug;
+        $this->cacheDir = $cacheDir;
     }
 
     /**
@@ -54,7 +60,7 @@ class ProjectRouter
         if ($this->router === null) {
             $loader = new YamlFileLoader(new FileLocator($this->routingDir));
 
-            $cacheDir = __DIR__.'/cache/'.($this->debug ? 'debug' : 'prod');
+            $cacheDir = $this->cacheDir.'/'.($this->debug ? 'debug' : 'prod');
             
             if (!file_exists($cacheDir)) {
                 if (!file_exists(dirname($cacheDir))) {
@@ -121,7 +127,7 @@ class ProjectRouter
             }
 
             return $parameters['_app'];
-        } catch (NotFoundException $e) {
+        } catch (ResourceNotFoundException $e) {
             return $default;
         }
     }
